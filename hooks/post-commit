@@ -1,7 +1,9 @@
 #!/usr/bin/sh
 
+GIT_LOCAL_BACKUP_DIR=$(git config get gitlocalbackup.directory)
+
 HEADER="################"
-BACKUP_DISABLED_MESSAGE=$(printf 'local backup disabled.\nSet GIT_LOCAL_BACKUP_DIR env variable to enable it')
+BACKUP_DISABLED_MESSAGE=$(printf 'local backup disabled. Run:\n$ git config set gitlocalbackup.directory <BACKUP-DIRECTORY>\nto enable it')
 
 if [ -z "$GIT_LOCAL_BACKUP_DIR" ]; then
     printf '\n%s\n%s\n%s\n\n' "$HEADER" "$BACKUP_DISABLED_MESSAGE" "$HEADER"
