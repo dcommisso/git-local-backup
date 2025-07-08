@@ -1,0 +1,13 @@
+#!/usr/bin/sh
+
+if [ -n "$GIT_LOCAL_BACKUP_DIR" ]; then
+    REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
+    BACKUP_FILE=$REPO_NAME-$(date '+%Y%m%d%H%M%S')
+    BACKUP_FULL_PATH=$GIT_LOCAL_BACKUP_DIR/$BACKUP_FILE
+    git bundle create "$BACKUP_FULL_PATH" --all
+    printf "\n################\nbackup created: %s\n################\n\n" "$BACKUP_FULL_PATH"
+    #echo "backup created: $BACKUP_FULL_PATH"
+    #printf "################\n"
+else
+    echo "backup disabled"
+fi
