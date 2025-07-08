@@ -1,13 +1,17 @@
 #!/usr/bin/sh
 
-if [ -n "$GIT_LOCAL_BACKUP_DIR" ]; then
-    REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
-    BACKUP_FILE=$REPO_NAME-$(date '+%Y%m%d%H%M%S')
-    BACKUP_FULL_PATH=$GIT_LOCAL_BACKUP_DIR/$BACKUP_FILE
-    git bundle create "$BACKUP_FULL_PATH" --all
-    printf "\n################\nbackup created: %s\n################\n\n" "$BACKUP_FULL_PATH"
-    #echo "backup created: $BACKUP_FULL_PATH"
-    #printf "################\n"
-else
-    echo "backup disabled"
+HEADER="################"
+BACKUP_DISABLED_MESSAGE=$(printf 'local backup disabled.\nSet GIT_LOCAL_BACKUP_DIR env variable to enable it')
+
+if [ -z "$GIT_LOCAL_BACKUP_DIR" ]; then
+    printf '\n%s\n%s\n%s\n\n' "$HEADER" "$BACKUP_DISABLED_MESSAGE" "$HEADER"
+    exit 0
 fi
+
+REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
+BACKUP_FILE=$REPO_NAME-$(date '+%Y%m%d%H%M%S')
+BACKUP_FULL_PATH=$GIT_LOCAL_BACKUP_DIR/$BACKUP_FILE
+git bundle create "$BACKUP_FULL_PATH" --all
+printf "\n################\nbackup created: %s\n################\n\n" "$BACKUP_FULL_PATH"
+#echo "backup created: $BACKUP_FULL_PATH"
+#printf "################\n"
