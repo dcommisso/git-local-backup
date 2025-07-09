@@ -21,7 +21,7 @@ if [ -z "$GIT_LOCAL_BACKUP_DIR" ]; then
 fi
 
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
-BACKUP_FILE=$REPO_NAME-$(date '+%Y%m%d%H%M%S')
+BACKUP_FILE=$REPO_NAME-$(date '+%Y%m%d%H%M%S').bundle
 BACKUP_FULL_PATH=$GIT_LOCAL_BACKUP_DIR/$BACKUP_FILE
 BACKUP_SUCCESSFUL_MESSAGE=$(printf 'backup created: %s' "$BACKUP_FULL_PATH")
 
