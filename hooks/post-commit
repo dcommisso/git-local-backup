@@ -1,12 +1,22 @@
 #!/usr/bin/sh
 
+print_message() {
+    DELIMITER="################"
+
+    echo
+    echo $DELIMITER
+    echo "$1"
+    echo $DELIMITER
+    echo
+}
+
 GIT_LOCAL_BACKUP_DIR=$(git config get gitlocalbackup.directory)
 
-HEADER="################"
 BACKUP_DISABLED_MESSAGE=$(printf 'local backup disabled. Run:\n$ git config set gitlocalbackup.directory <BACKUP-DIRECTORY>\nto enable it')
+BACKUP_DIRECTORY_NON_EXISTING_MESSAGE=$(printf "git-local-backup error: %s directory doesn't exist\n" "$GIT_LOCAL_BACKUP_DIR")
 
 if [ -z "$GIT_LOCAL_BACKUP_DIR" ]; then
-    printf '\n%s\n%s\n%s\n\n' "$HEADER" "$BACKUP_DISABLED_MESSAGE" "$HEADER"
+    print_message "$BACKUP_DISABLED_MESSAGE"
     exit 0
 fi
 
@@ -17,10 +27,7 @@ BACKUP_SUCCESSFUL_MESSAGE=$(printf 'backup created: %s' "$BACKUP_FULL_PATH")
 
 # exit if backup directory doesn't exist
 if [ ! -d "$GIT_LOCAL_BACKUP_DIR" ]; then
-    echo $HEADER
-    printf "git-local-backup error: %s directory doesn't exist\n" "$GIT_LOCAL_BACKUP_DIR"
-    echo $HEADER
-    echo
+    print_message "$BACKUP_DIRECTORY_NON_EXISTING_MESSAGE"
     exit 1
 fi
 
@@ -28,4 +35,4 @@ if ! git bundle create "$BACKUP_FULL_PATH" --all; then
     exit 1
 fi
 
-printf '\n%s\n%s\n%s\n\n' "$HEADER" "$BACKUP_SUCCESSFUL_MESSAGE" "$HEADER"
+print_message "$BACKUP_SUCCESSFUL_MESSAGE"
