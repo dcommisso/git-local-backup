@@ -15,6 +15,7 @@ GIT_LOCAL_BACKUP_DIR=$(git config get gitlocalbackup.directory)
 BACKUP_DISABLED_MESSAGE=$(printf 'local backup disabled. Run:\n$ git config set gitlocalbackup.directory <BACKUP-DIRECTORY>\nto enable it')
 BACKUP_DIRECTORY_NON_EXISTING_MESSAGE=$(printf "git-local-backup error: %s directory doesn't exist\n" "$GIT_LOCAL_BACKUP_DIR")
 
+# exit if backup is disabled
 if [ -z "$GIT_LOCAL_BACKUP_DIR" ]; then
     print_message "$BACKUP_DISABLED_MESSAGE"
     exit 0
@@ -23,7 +24,8 @@ fi
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
 BACKUP_FILE=$REPO_NAME-$(date '+%Y%m%d%H%M%S').bundle
 BACKUP_FULL_PATH=$GIT_LOCAL_BACKUP_DIR/$BACKUP_FILE
-BACKUP_SUCCESSFUL_MESSAGE=$(printf 'backup created: %s' "$BACKUP_FULL_PATH")
+LINK_TO_LATEST_BACKUP=${GIT_LOCAL_BACKUP_DIR}/${REPO_NAME}.bundle
+BACKUP_SUCCESSFUL_MESSAGE=$(printf 'backup created: %s\nlink created: %s -> %s' "$BACKUP_FULL_PATH" "$LINK_TO_LATEST_BACKUP" "$BACKUP_FULL_PATH")
 
 # exit if backup directory doesn't exist
 if [ ! -d "$GIT_LOCAL_BACKUP_DIR" ]; then
@@ -31,7 +33,13 @@ if [ ! -d "$GIT_LOCAL_BACKUP_DIR" ]; then
     exit 1
 fi
 
+# create git bundle
 if ! git bundle create "$BACKUP_FULL_PATH" --all; then
+    exit 1
+fi
+
+# create link to latest bundle
+if ! ln -sf "$BACKUP_FULL_PATH" "$LINK_TO_LATEST_BACKUP"; then
     exit 1
 fi
 
