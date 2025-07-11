@@ -1,13 +1,26 @@
-#!/usr/bin/sh
+#!/usr/bin/bash
 
-print_message() {
+APP_MESSAGES=()
+
+log_message() {
+    APP_MESSAGES+=("$1")
+}
+
+print_messages() {
     DELIMITER="################"
 
     echo
     echo $DELIMITER
-    echo "$1"
+    for message in "${APP_MESSAGES[@]}"; do
+        echo "$message"
+    done
     echo $DELIMITER
     echo
+}
+
+print_messages_and_exit_with_status() {
+    print_messages
+    exit "$1"
 }
 
 GIT_LOCAL_BACKUP_DIR=$(git config get gitlocalbackup.directory)
@@ -17,8 +30,8 @@ BACKUP_DIRECTORY_NON_EXISTING_MESSAGE=$(printf "git-local-backup error: %s direc
 
 # exit if backup is disabled
 if [ -z "$GIT_LOCAL_BACKUP_DIR" ]; then
-    print_message "$BACKUP_DISABLED_MESSAGE"
-    exit 0
+    log_message "$BACKUP_DISABLED_MESSAGE"
+    print_messages_and_exit_with_status 0
 fi
 
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
@@ -29,18 +42,20 @@ BACKUP_SUCCESSFUL_MESSAGE=$(printf 'backup created: %s\nlink created: %s -> %s' 
 
 # exit if backup directory doesn't exist
 if [ ! -d "$GIT_LOCAL_BACKUP_DIR" ]; then
-    print_message "$BACKUP_DIRECTORY_NON_EXISTING_MESSAGE"
-    exit 1
+    log_message "$BACKUP_DIRECTORY_NON_EXISTING_MESSAGE"
+    print_messages_and_exit_with_status 1
 fi
 
 # create git bundle
 if ! git bundle create "$BACKUP_FULL_PATH" --all; then
-    exit 1
+    print_messages_and_exit_with_status 1
 fi
 
 # create link to latest bundle
 if ! ln -sf "$BACKUP_FULL_PATH" "$LINK_TO_LATEST_BACKUP"; then
-    exit 1
+    print_messages_and_exit_with_status 1
 fi
 
-print_message "$BACKUP_SUCCESSFUL_MESSAGE"
+log_message "$BACKUP_SUCCESSFUL_MESSAGE"
+
+print_messages
