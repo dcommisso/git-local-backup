@@ -24,9 +24,26 @@ print_messages_and_exit_with_status() {
 }
 
 GIT_LOCAL_BACKUP_DIR=$(git config get gitlocalbackup.directory)
+BACKUPS_TO_KEEP=$(git config get gitlocalbackup.backupstokeep)
 
 BACKUP_DISABLED_MESSAGE=$(printf 'local backup disabled. Run:\n$ git config set gitlocalbackup.directory <BACKUP-DIRECTORY>\nto enable it')
 BACKUP_DIRECTORY_NON_EXISTING_MESSAGE=$(printf "git-local-backup error: %s directory doesn't exist\n" "$GIT_LOCAL_BACKUP_DIR")
+
+BACKUPS_TO_KEEP_INVALID_MESSAGE="git-local-backup error: gitlocalbackup.backupstokeep must be a number greater than 0"
+
+# exit if backupstokeep value is invalid
+if [ -n "$BACKUPS_TO_KEEP" ] && [ "$BACKUPS_TO_KEEP" -le 0 ]; then
+    log_message "$BACKUPS_TO_KEEP_INVALID_MESSAGE"
+    print_messages_and_exit_with_status 1
+fi
+
+# warn if pruning is disabled
+if [ -z "$BACKUPS_TO_KEEP" ]; then
+    log_message "Warning: Pruning is disabled. Run:"
+    log_message "$ git config set gitlocalbackup.backupstokeep <NUMBER-OF-BACKUP>"
+    log_message "to enable it"
+    log_message
+fi
 
 # exit if backup is disabled
 if [ -z "$GIT_LOCAL_BACKUP_DIR" ]; then
@@ -57,5 +74,15 @@ if ! ln -sf "$BACKUP_FULL_PATH" "$LINK_TO_LATEST_BACKUP"; then
 fi
 
 log_message "$BACKUP_SUCCESSFUL_MESSAGE"
+
+# prune old backups
+if [ -n "$BACKUPS_TO_KEEP" ]; then
+    log_message
+    log_message "Pruning old backups, keeping the last $BACKUPS_TO_KEEP"
+    for file_to_remove in $(find "${GIT_LOCAL_BACKUP_DIR}" -type f -regextype sed -regex "${GIT_LOCAL_BACKUP_DIR}/${REPO_NAME}-[0-9]\{14\}\.bundle" | head -n -"${BACKUPS_TO_KEEP}"); do
+        log_message "$(printf 'delete file %s\n' "$file_to_remove")"
+        rm -- "${file_to_remove}"
+    done
+fi
 
 print_messages
