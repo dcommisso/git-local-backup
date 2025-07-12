@@ -26,9 +26,23 @@ print_messages_and_exit_with_status() {
 GIT_LOCAL_BACKUP_DIR=$(git config get gitlocalbackup.directory)
 BACKUPS_TO_KEEP=$(git config get gitlocalbackup.backupstokeep)
 
+# exit if backup is disabled
+if [ -z "$GIT_LOCAL_BACKUP_DIR" ]; then
+    log_message "local backup disabled. Run:"
+    log_message "$ git config set gitlocalbackup.directory <BACKUP-DIRECTORY>"
+    log_message "to enable it"
+    print_messages_and_exit_with_status 0
+fi
+
 # exit if backupstokeep value is invalid
 if [ -n "$BACKUPS_TO_KEEP" ] && [ "$BACKUPS_TO_KEEP" -le 0 ]; then
     log_message "git-local-backup error: gitlocalbackup.backupstokeep must be a number greater than 0"
+    print_messages_and_exit_with_status 1
+fi
+
+# exit if backup directory doesn't exist
+if [ ! -d "$GIT_LOCAL_BACKUP_DIR" ]; then
+    log_message "git-local-backup error: $GIT_LOCAL_BACKUP_DIR directory doesn't exist"
     print_messages_and_exit_with_status 1
 fi
 
@@ -40,24 +54,10 @@ if [ -z "$BACKUPS_TO_KEEP" ]; then
     log_message
 fi
 
-# exit if backup is disabled
-if [ -z "$GIT_LOCAL_BACKUP_DIR" ]; then
-    log_message "local backup disabled. Run:"
-    log_message "$ git config set gitlocalbackup.directory <BACKUP-DIRECTORY>"
-    log_message "to enable it"
-    print_messages_and_exit_with_status 0
-fi
-
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
 BACKUP_FILE=$REPO_NAME-$(date '+%Y%m%d%H%M%S').bundle
 BACKUP_FULL_PATH=$GIT_LOCAL_BACKUP_DIR/$BACKUP_FILE
 LINK_TO_LATEST_BACKUP=${GIT_LOCAL_BACKUP_DIR}/${REPO_NAME}.bundle
-
-# exit if backup directory doesn't exist
-if [ ! -d "$GIT_LOCAL_BACKUP_DIR" ]; then
-    log_message "git-local-backup error: $GIT_LOCAL_BACKUP_DIR directory doesn't exist"
-    print_messages_and_exit_with_status 1
-fi
 
 # create git bundle
 if ! git bundle create "$BACKUP_FULL_PATH" --all; then
