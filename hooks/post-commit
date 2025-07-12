@@ -26,14 +26,9 @@ print_messages_and_exit_with_status() {
 GIT_LOCAL_BACKUP_DIR=$(git config get gitlocalbackup.directory)
 BACKUPS_TO_KEEP=$(git config get gitlocalbackup.backupstokeep)
 
-BACKUP_DISABLED_MESSAGE=$(printf 'local backup disabled. Run:\n$ git config set gitlocalbackup.directory <BACKUP-DIRECTORY>\nto enable it')
-BACKUP_DIRECTORY_NON_EXISTING_MESSAGE=$(printf "git-local-backup error: %s directory doesn't exist\n" "$GIT_LOCAL_BACKUP_DIR")
-
-BACKUPS_TO_KEEP_INVALID_MESSAGE="git-local-backup error: gitlocalbackup.backupstokeep must be a number greater than 0"
-
 # exit if backupstokeep value is invalid
 if [ -n "$BACKUPS_TO_KEEP" ] && [ "$BACKUPS_TO_KEEP" -le 0 ]; then
-    log_message "$BACKUPS_TO_KEEP_INVALID_MESSAGE"
+    log_message "git-local-backup error: gitlocalbackup.backupstokeep must be a number greater than 0"
     print_messages_and_exit_with_status 1
 fi
 
@@ -47,7 +42,9 @@ fi
 
 # exit if backup is disabled
 if [ -z "$GIT_LOCAL_BACKUP_DIR" ]; then
-    log_message "$BACKUP_DISABLED_MESSAGE"
+    log_message "local backup disabled. Run:"
+    log_message "$ git config set gitlocalbackup.directory <BACKUP-DIRECTORY>"
+    log_message "to enable it"
     print_messages_and_exit_with_status 0
 fi
 
@@ -55,11 +52,10 @@ REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
 BACKUP_FILE=$REPO_NAME-$(date '+%Y%m%d%H%M%S').bundle
 BACKUP_FULL_PATH=$GIT_LOCAL_BACKUP_DIR/$BACKUP_FILE
 LINK_TO_LATEST_BACKUP=${GIT_LOCAL_BACKUP_DIR}/${REPO_NAME}.bundle
-BACKUP_SUCCESSFUL_MESSAGE=$(printf 'backup created: %s\nlink created: %s -> %s' "$BACKUP_FULL_PATH" "$LINK_TO_LATEST_BACKUP" "$BACKUP_FULL_PATH")
 
 # exit if backup directory doesn't exist
 if [ ! -d "$GIT_LOCAL_BACKUP_DIR" ]; then
-    log_message "$BACKUP_DIRECTORY_NON_EXISTING_MESSAGE"
+    log_message "git-local-backup error: $GIT_LOCAL_BACKUP_DIR directory doesn't exist"
     print_messages_and_exit_with_status 1
 fi
 
@@ -73,14 +69,15 @@ if ! ln -sf "$BACKUP_FULL_PATH" "$LINK_TO_LATEST_BACKUP"; then
     print_messages_and_exit_with_status 1
 fi
 
-log_message "$BACKUP_SUCCESSFUL_MESSAGE"
+log_message "backup created: $BACKUP_FULL_PATH"
+log_message "link created: $LINK_TO_LATEST_BACKUP -> $BACKUP_FULL_PATH"
 
 # prune old backups
 if [ -n "$BACKUPS_TO_KEEP" ]; then
     log_message
     log_message "Pruning old backups, keeping the last $BACKUPS_TO_KEEP"
     for file_to_remove in $(find "${GIT_LOCAL_BACKUP_DIR}" -type f -regextype sed -regex "${GIT_LOCAL_BACKUP_DIR}/${REPO_NAME}-[0-9]\{14\}\.bundle" | head -n -"${BACKUPS_TO_KEEP}"); do
-        log_message "$(printf 'delete file %s\n' "$file_to_remove")"
+        log_message "delete file $file_to_remove"
         rm -- "${file_to_remove}"
     done
 fi
