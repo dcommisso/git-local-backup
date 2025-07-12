@@ -7,14 +7,14 @@ log_message() {
 }
 
 print_messages() {
-    DELIMITER="################"
-
     echo
-    echo $DELIMITER
+    echo "########################"
+    echo "### git-local-backup ###"
+    echo "########################"
     for message in "${APP_MESSAGES[@]}"; do
         echo "$message"
     done
-    echo $DELIMITER
+    echo "########################"
     echo
 }
 
@@ -36,19 +36,19 @@ fi
 
 # exit if backupstokeep value is invalid
 if [ -n "$BACKUPS_TO_KEEP" ] && [ "$BACKUPS_TO_KEEP" -le 0 ]; then
-    log_message "git-local-backup error: gitlocalbackup.backupstokeep must be a number greater than 0"
+    log_message "ERROR: gitlocalbackup.backupstokeep must be a number greater than 0"
     print_messages_and_exit_with_status 1
 fi
 
 # exit if backup directory doesn't exist
 if [ ! -d "$GIT_LOCAL_BACKUP_DIR" ]; then
-    log_message "git-local-backup error: $GIT_LOCAL_BACKUP_DIR directory doesn't exist"
+    log_message "ERROR: $GIT_LOCAL_BACKUP_DIR directory doesn't exist"
     print_messages_and_exit_with_status 1
 fi
 
 # warn if pruning is disabled
 if [ -z "$BACKUPS_TO_KEEP" ]; then
-    log_message "Warning: Pruning is disabled. Run:"
+    log_message "INFO: Pruning is disabled. Run:"
     log_message "$ git config set gitlocalbackup.backupstokeep <NUMBER-OF-BACKUP>"
     log_message "to enable it"
     log_message
