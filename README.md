@@ -27,10 +27,9 @@ A solution to automatically backup git repos on local / cloud-synced folders (Ne
 
 ### Configuring backup for new repositories
 It's also possible to use git-local-backup repo as template for new repository, in order to create and install backup using just one command:
-
-    ```
-    $ git init --template=git-local-backup <NEW-REPOSITORY>
-    ```
+```
+$ git init --template=git-local-backup <NEW-REPOSITORY>
+```
 
 ## Restore backup
 Just run `git clone` on bundle file:
