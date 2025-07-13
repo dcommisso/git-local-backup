@@ -27,6 +27,7 @@ A solution to automatically backup git repos on local / cloud-synced folders (Ne
 
 ### Configuring backup for new repositories
 It's also possible to use git-local-backup repo as template for new repository, in order to create and install backup using just one command:
+
     ```
     $ git init --template=git-local-backup <NEW-REPOSITORY>
     ```
@@ -53,7 +54,7 @@ So I ended up writing a bash script  configured as `post-commit` git hook that r
 Since the script is configured as `post-commit` git hook, it will be automatically executed after each commit. The script runs `git bundle create --all` and saves the bundle in backup directory defined in `gitlocalbackup.directory`, creates/moves the link to the last backup file and deletes older bundles (if configured) according to `gitlocalbackup.backupstokeep` git option. Please check the console logs after each commit to make sure the backup worked properly. 
 
 ## Sync a repository between devices
-If the directory where the backup is stored is accessible by other devices is possible to keep repositories in sync:
+If the directory where the backup is stored is accessible by other devices it's possible to keep repositories in sync:
 
 ```
 $ git clone <BACKUP-DIR>/<REPO-NAME>.bundle
