@@ -31,6 +31,13 @@ It's also possible to use git-local-backup repo as template for new repository, 
     $ git init --template=git-local-backup <NEW-REPOSITORY>
     ```
 
+## Restore backup
+Just run `git clone` on bundle file:
+
+```
+$ git clone <BACKUP-DIR>/<REPO-NAME>.bundle
+```
+
 ## Uninstall git-local-backup
 Just delete the `post-commit` script in your repository:
 
