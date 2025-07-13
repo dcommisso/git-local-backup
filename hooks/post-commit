@@ -82,4 +82,20 @@ if [ -n "$BACKUPS_TO_KEEP" ]; then
     done
 fi
 
+# check that last backup has not been deleted due to a bug
+if [ -f "${LINK_TO_LATEST_BACKUP}" ]; then
+    log_message
+    log_message "Integrity check OK"
+else
+    log_message
+    log_message "ERROR: Integrity check failed"
+    log_message "Your backup may be inconsistent"
+    log_message "This shouldn't happen, please open a bug report here:"
+    log_message "https://github.com/dcommisso/git-local-backup/issues"
+    log_message
+    log_message "Try disabling pruning as a workaround:"
+    log_message "$ git config unset gitlocalbackup.backupstokeep"
+    print_messages_and_exit_with_status 1
+fi
+
 print_messages
