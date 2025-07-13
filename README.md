@@ -6,19 +6,19 @@ A solution to automatically backup git repos on local / cloud-synced folders (Ne
     ```
     $ git clone https://github.com/dcommisso/git-local-backup.git
     ```
-   
+
 2. Link (or copy) `hooks/post-commit` to the repo to backup:
     ```
     $ ln -s git-local-backup/hooks/post-commit <YOUR-REPO>/.git/hooks/post-commit
     ```
-   
+
 3. Enter your repo and configure the directory where the backups will be saved:
     ```
     $ cd <YOUR-REPO>
 
     $ git config set gitlocalbackup.directory <BACKUP-DIRECTORY>
     ```
-   
+
 4. (Optional) Set the number of bundle files to keep:
     ```
     $ git config set gitlocalbackup.backupstokeep <NUMBER-OF-BACKUPS>
